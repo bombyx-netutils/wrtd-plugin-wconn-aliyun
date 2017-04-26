@@ -1,5 +1,5 @@
 {
-    "plugin", "aliyun",
+    "plugin": "aliyun",
     "internet": {
         "ip": "121.33.97.55/22",
         "gateway", "121.33.99.247",
