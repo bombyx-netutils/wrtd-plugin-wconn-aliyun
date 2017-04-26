@@ -47,10 +47,13 @@ class _PluginObject:
         if ifname == "eth0":
             if "intranet" in self.cfg:
                 ip, netmask = self.cfg["intranet"]["ip"].split("/")
+                baddr = str(ipaddress.IPv4Network(self.cfg["intranet"]["ip"]).network_address)
                 with pyroute2.IPRoute() as ipp:
                     idx = ipp.link_lookup(ifname="eth0")[0]
                     ipp.link("set", index=idx, state="up")
-                    ipp.addr("add", index=idx, address=ip, mask=_Util.ipMaskToLen(netmask))
+                    ipp.addr("add", index=idx, address=ip, mask=_Util.ipMaskToLen(netmask), broadcast=baddr)
+                    import time     # fixme
+                    time.sleep(1.0)
                     if "routes" in self.cfg["intranet"]:
                         for rt in self.cfg["intranet"]["routes"]:
                             ipp.route('add', dst=rt["prefix"], gateway=rt["gateway"], oif=idx)
@@ -59,10 +62,13 @@ class _PluginObject:
 
         if ifname == "eth1":
             ip, netmask = self.cfg["internet"]["ip"].split("/")
+            baddr = str(ipaddress.IPv4Network(self.cfg["internet"]["ip"]).network_address)
             with pyroute2.IPRoute() as ipp:
                 idx = ipp.link_lookup(ifname="eth1")[0]
                 ipp.link("set", index=idx, state="up")
-                ipp.addr("add", index=idx, address=ip, mask=_Util.ipMaskToLen(netmask))
+                ipp.addr("add", index=idx, address=ip, mask=_Util.ipMaskToLen(netmask), broadcast=baddr)
+                import time     # fixme
+                time.sleep(1.0)
                 if "gateway" in self.cfg["internet"]:
                     ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["internet"]["gateway"], oif=idx)
             logging.info("WAN: Internet interface \"%s\" is managed." % (ifname))
