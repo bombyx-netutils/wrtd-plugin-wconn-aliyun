@@ -48,7 +48,7 @@ class _PluginObject:
         if ifname == "eth0":
             if "intranet" in self.cfg:
                 ip, netmask = self.cfg["intranet"]["ip"].split("/")
-                baddr = str(ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False).network_address)
+                baddr = str(ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False).broadcast_address)
                 with pyroute2.IPRoute() as ipp:
                     idx = ipp.link_lookup(ifname="eth0")[0]
                     ipp.link("set", index=idx, state="up")
@@ -63,7 +63,7 @@ class _PluginObject:
 
         if ifname == "eth1":
             ip, netmask = self.cfg["internet"]["ip"].split("/")
-            baddr = str(ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False).network_address)
+            baddr = str(ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False).broadcast_address)
             with pyroute2.IPRoute() as ipp:
                 idx = ipp.link_lookup(ifname="eth1")[0]
                 ipp.link("set", index=idx, state="up")
