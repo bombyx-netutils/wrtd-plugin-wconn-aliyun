@@ -52,7 +52,7 @@ class _PluginObject:
                 with pyroute2.IPRoute() as ipp:
                     idx = ipp.link_lookup(ifname="eth0")[0]
                     ipp.link("set", index=idx, state="up")
-                    ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=bnet.broadcast_address)
+                    ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=str(bnet.broadcast_address))
                     import time     # fixme
                     time.sleep(1.0)
                     if "routes" in self.cfg["intranet"]:
@@ -67,7 +67,7 @@ class _PluginObject:
             with pyroute2.IPRoute() as ipp:
                 idx = ipp.link_lookup(ifname="eth1")[0]
                 ipp.link("set", index=idx, state="up")
-                ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=bnet.broadcast_address)
+                ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=str(bnet.broadcast_address))
                 import time     # fixme
                 time.sleep(1.0)
                 if "gateway" in self.cfg["internet"]:
