@@ -47,12 +47,12 @@ class _PluginObject:
     def interface_appear(self, ifname):
         if ifname == "eth0":
             if "intranet" in self.cfg:
-                ip, netmask = self.cfg["intranet"]["ip"].split("/")
-                baddr = str(ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False).network_address)
+                ip = self.cfg["intranet"]["ip"].split("/")[0]
+                bnet = ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False)
                 with pyroute2.IPRoute() as ipp:
                     idx = ipp.link_lookup(ifname="eth0")[0]
                     ipp.link("set", index=idx, state="up")
-                    ipp.addr("add", index=idx, address=ip, mask=_Util.ipMaskToLen(netmask), broadcast=baddr)
+                    ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=bnet.broadcast_address)
                     import time     # fixme
                     time.sleep(1.0)
                     if "routes" in self.cfg["intranet"]:
@@ -62,12 +62,12 @@ class _PluginObject:
             return True
 
         if ifname == "eth1":
-            ip, netmask = self.cfg["internet"]["ip"].split("/")
-            baddr = str(ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False).network_address)
+            ip = self.cfg["internet"]["ip"].split("/")[0]
+            bnet = ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False)
             with pyroute2.IPRoute() as ipp:
                 idx = ipp.link_lookup(ifname="eth1")[0]
                 ipp.link("set", index=idx, state="up")
-                ipp.addr("add", index=idx, address=ip, mask=_Util.ipMaskToLen(netmask), broadcast=baddr)
+                ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=bnet.broadcast_address)
                 import time     # fixme
                 time.sleep(1.0)
                 if "gateway" in self.cfg["internet"]:
@@ -79,17 +79,3 @@ class _PluginObject:
 
     def interface_disappear(self, ifname):
         pass
-
-
-class _Util:
-
-    @staticmethod
-    def ipMaskToLen(mask):
-        """255.255.255.0 -> 24"""
-
-        netmask = 0
-        netmasks = mask.split('.')
-        for i in range(0, len(netmasks)):
-            netmask *= 256
-            netmask += int(netmasks[i])
-        return 32 - (netmask ^ 0xFFFFFFFF).bit_length()
