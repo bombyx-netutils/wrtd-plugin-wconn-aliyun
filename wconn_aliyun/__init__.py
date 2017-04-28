@@ -48,7 +48,7 @@ class _PluginObject:
         if ifname == "eth0":
             if "intranet" in self.cfg:
                 ip = self.cfg["intranet"]["ip"].split("/")[0]
-                bnet = ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False)
+                bnet = ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False)
                 with pyroute2.IPRoute() as ipp:
                     idx = ipp.link_lookup(ifname="eth0")[0]
                     ipp.link("set", index=idx, state="up")
