@@ -38,6 +38,13 @@ class _PluginObject:
             logging.info("WAN: Nameservers are \"%s\"." % ("\",\"".join(self.cfg["internet"]["nameservers"])))
 
     def stop(self):
+        for ifname in ["eth0", "eth1"]:
+            with pyroute2.IPRoute() as ipp:
+                idx = ipp.link_lookup(ifname=ifname)[0]
+                if idx is not None:
+                    ipp.link("set", index=idx, state="down")
+                    ipp.flush_addr(index=idx)
+
         with open(self.ownResolvConf, "w") as f:
             f.write("")
 
