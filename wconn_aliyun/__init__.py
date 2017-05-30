@@ -28,14 +28,14 @@ class _PluginObject:
         self.cfg = cfg
         self.tmpDir = tmpDir
         self.ownResolvConf = ownResolvConf
-        self.proc = None
+        self.logger = logging.getLogger(self.__module__ + "." + self.__class__.__name__)
 
     def start(self):
         if "nameservers" in self.cfg["internet"]:
             with open(self.ownResolvConf, "w") as f:
                 for ns in self.cfg["internet"]["nameservers"]:
                     f.write("nameserver %s\n" % (ns))
-            logging.info("WAN: Nameservers are \"%s\"." % ("\",\"".join(self.cfg["internet"]["nameservers"])))
+            self.logger.info("Nameservers are \"%s\"." % ("\",\"".join(self.cfg["internet"]["nameservers"])))
 
     def stop(self):
         for ifname in ["eth0", "eth1"]:
@@ -48,8 +48,18 @@ class _PluginObject:
         with open(self.ownResolvConf, "w") as f:
             f.write("")
 
-    def get_out_interface(self):
+    def get_interface(self):
         return "eth1"
+
+    def get_prefix_list(self):
+        ret = []
+        if "intranet" in self.cfg:
+            bnet = ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False)
+            ret.append((str(bnet.network_address), str(bnet.netmask)))
+        if True:
+            bnet = ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False)
+            ret.append((str(bnet.network_address), str(bnet.netmask)))
+        return ret
 
     def interface_appear(self, ifname):
         if ifname == "eth0":
