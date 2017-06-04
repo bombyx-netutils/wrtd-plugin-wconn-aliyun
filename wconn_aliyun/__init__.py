@@ -75,7 +75,7 @@ class _PluginObject:
                 with pyroute2.IPRoute() as ipp:
                     idx = ipp.link_lookup(ifname="eth0")[0]
                     ipp.link("set", index=idx, state="up")
-                    ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=bnet.broadcast_address)
+                    ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=str(bnet.broadcast_address))
                     if "routes" in self.cfg["intranet"]:
                         for rt in self.cfg["intranet"]["routes"]:
                             ipp.route('add', dst=rt["prefix"], gateway=rt["gateway"], oif=idx)
@@ -88,7 +88,7 @@ class _PluginObject:
             with pyroute2.IPRoute() as ipp:
                 idx = ipp.link_lookup(ifname="eth1")[0]
                 ipp.link("set", index=idx, state="up")
-                ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=bnet.broadcast_address)
+                ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=str(bnet.broadcast_address))
                 if "gateway" in self.cfg["internet"]:
                     ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["internet"]["gateway"], oif=idx)
             self.logger.info("Internet interface \"%s\" managed." % (ifname))
