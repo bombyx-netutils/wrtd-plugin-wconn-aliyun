@@ -21,9 +21,6 @@ def get_plugin(name):
 
 class _PluginObject:
 
-    def __init__(self):
-        pass
-
     def init2(self, cfg, tmpDir, ownResolvConf, upCallback, downCallback):
         self.cfg = cfg
         self.tmpDir = tmpDir
