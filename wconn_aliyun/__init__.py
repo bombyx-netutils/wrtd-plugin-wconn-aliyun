@@ -54,6 +54,9 @@ class _PluginObject:
             f.write("")
         self.logger.info("Stopped.")
 
+    def is_alive(self):
+        return True
+
     def get_interface(self):
         return "eth1"
 
