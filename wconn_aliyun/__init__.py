@@ -24,10 +24,12 @@ class _PluginObject:
     def __init__(self):
         pass
 
-    def init2(self, cfg, tmpDir, ownResolvConf):
+    def init2(self, cfg, tmpDir, ownResolvConf, upCallback, downCallback):
         self.cfg = cfg
         self.tmpDir = tmpDir
         self.ownResolvConf = ownResolvConf
+        self.upCallback = upCallback
+        self.downCallback = downCallback
         self.logger = logging.getLogger(self.__module__ + "." + self.__class__.__name__)
 
     def start(self):
@@ -36,6 +38,7 @@ class _PluginObject:
                 for ns in self.cfg["internet"]["nameservers"]:
                     f.write("nameserver %s\n" % (ns))
             self.logger.info("Nameservers are \"%s\"." % ("\",\"".join(self.cfg["internet"]["nameservers"])))
+        self.logger.info("Started.")
 
     def stop(self):
         for ifname in ["eth0", "eth1"]:
@@ -44,9 +47,11 @@ class _PluginObject:
                 if idx is not None:
                     ipp.link("set", index=idx, state="down")
                     ipp.flush_addr(index=idx)
-
+                    if ifname == "eth1":
+                        self.downCallback()
         with open(self.ownResolvConf, "w") as f:
             f.write("")
+        self.logger.info("Stopped.")
 
     def get_interface(self):
         return "eth1"
@@ -73,7 +78,7 @@ class _PluginObject:
                     if "routes" in self.cfg["intranet"]:
                         for rt in self.cfg["intranet"]["routes"]:
                             ipp.route('add', dst=rt["prefix"], gateway=rt["gateway"], oif=idx)
-            logging.info("WAN: Internet interface \"%s\" is managed." % (ifname))
+            self.logger.info("Internet interface \"%s\" managed." % (ifname))
             return True
 
         if ifname == "eth1":
@@ -85,10 +90,12 @@ class _PluginObject:
                 ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=bnet.broadcast_address)
                 if "gateway" in self.cfg["internet"]:
                     ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["internet"]["gateway"], oif=idx)
-            logging.info("WAN: Internet interface \"%s\" is managed." % (ifname))
+            self.logger.info("Internet interface \"%s\" managed." % (ifname))
+            self.upCallback()
             return True
 
         return False
 
     def interface_disappear(self, ifname):
-        pass
+        if ifname == "eth1":
+            self.downCallback()
