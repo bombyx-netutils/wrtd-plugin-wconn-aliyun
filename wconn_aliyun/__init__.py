@@ -43,12 +43,16 @@ class _PluginObject:
     def stop(self):
         for ifname in ["eth0", "eth1"]:
             with pyroute2.IPRoute() as ipp:
-                idx = ipp.link_lookup(ifname=ifname)[0]
-                if idx is not None:
-                    ipp.link("set", index=idx, state="down")
-                    ipp.flush_addr(index=idx)
-                    if ifname == "eth1":
-                        self.downCallback()
+                idx = None
+                try:
+                    idx = ipp.link_lookup(ifname=ifname)[0]
+                except IndexError:
+                    continue
+                ipp.link("set", index=idx, state="down")
+                ipp.flush_addr(index=idx)
+                if ifname == "eth1":
+                    self.downCallback()
+
         with open(self.ownResolvConf, "w") as f:
             f.write("")
         self.logger.info("Stopped.")
