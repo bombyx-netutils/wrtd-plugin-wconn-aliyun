@@ -63,6 +63,7 @@ class _PluginObject:
         return self.cfg["internet"]["ip"].split("/")[0]
 
     def get_interface(self):
+        assert self.is_alive()
         return "eth1"
 
     def get_prefix_list(self):
