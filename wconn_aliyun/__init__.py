@@ -67,6 +67,7 @@ class _PluginObject:
         return "eth1"
 
     def get_prefix_list(self):
+        assert self.is_alive()
         ret = []
         if "intranet" in self.cfg:
             bnet = ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False)
