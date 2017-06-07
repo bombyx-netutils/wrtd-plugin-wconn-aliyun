@@ -28,6 +28,7 @@ class _PluginObject:
         self.upCallback = upCallback
         self.downCallback = downCallback
         self.logger = logging.getLogger(self.__module__ + "." + self.__class__.__name__)
+        self.bAlive = False
 
     def start(self):
         if "nameservers" in self.cfg["internet"]:
@@ -55,7 +56,11 @@ class _PluginObject:
         self.logger.info("Stopped.")
 
     def is_alive(self):
-        return True
+        return self.bAlive
+
+    def get_ip(self):
+        assert self.is_alive()
+        return self.cfg["internet"]["ip"].split("/")[0]
 
     def get_interface(self):
         return "eth1"
@@ -95,6 +100,7 @@ class _PluginObject:
                 if "gateway" in self.cfg["internet"]:
                     ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["internet"]["gateway"], oif=idx)
             self.logger.info("Internet interface \"%s\" managed." % (ifname))
+            self.bAlive = True
             self.upCallback()
             return True
 
@@ -102,4 +108,5 @@ class _PluginObject:
 
     def interface_disappear(self, ifname):
         if ifname == "eth1":
+            self.bAlive = False
             self.downCallback()
