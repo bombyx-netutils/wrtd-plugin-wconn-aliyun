@@ -55,7 +55,7 @@ class _PluginObject:
             f.write("")
         self.logger.info("Stopped.")
 
-    def is_alive(self):
+    def is_connected(self):
         return self.bAlive
 
     def get_ip(self):
