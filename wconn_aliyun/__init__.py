@@ -89,7 +89,7 @@ class _PluginObject:
                     if "routes" in self.cfg["intranet"]:
                         for rt in self.cfg["intranet"]["routes"]:
                             ipp.route('add', dst=rt["prefix"], gateway=rt["gateway"], oif=idx)
-            self.logger.info("Internet interface \"%s\" managed." % (ifname))
+            self.logger.info("Intranet interface \"%s\" managed." % (ifname))
             return True
 
         if ifname == "eth1":
@@ -103,12 +103,16 @@ class _PluginObject:
                     ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["internet"]["gateway"], oif=idx)
             self.logger.info("Internet interface \"%s\" managed." % (ifname))
             self.bAlive = True
-            self.upCallback()
+            try:
+                self.upCallback()
+            except:
+                assert False               # fixme, what to do?
             return True
 
         return False
 
     def interface_disappear(self, ifname):
         if ifname == "eth1":
+            assert self.bAlive
             self.bAlive = False
             self.downCallback()
