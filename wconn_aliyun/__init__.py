@@ -62,18 +62,19 @@ class _PluginObject:
         assert self.is_connected()
         return self.cfg["internet"]["ip"].split("/")[0]
 
+    def get_netmask(self):
+        assert self.is_connected()
+        return self.cfg["internet"]["ip"].split("/")[1]
+
     def get_interface(self):
         assert self.is_connected()
         return "eth1"
 
-    def get_prefix_list(self):
+    def get_extra_prefix_list(self):
         assert self.is_connected()
         ret = []
         if "intranet" in self.cfg:
             bnet = ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False)
-            ret.append((str(bnet.network_address), str(bnet.netmask)))
-        if True:
-            bnet = ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False)
             ret.append((str(bnet.network_address), str(bnet.netmask)))
         return ret
 
