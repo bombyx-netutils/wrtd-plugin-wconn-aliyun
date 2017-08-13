@@ -30,6 +30,9 @@ class _PluginObject:
         self.logger = logging.getLogger(self.__module__ + "." + self.__class__.__name__)
         self.bAlive = False
 
+    def get_interface(self):
+        return "eth1"
+
     def start(self):
         if "nameservers" in self.cfg["internet"]:
             with open(self.ownResolvConf, "w") as f:
@@ -65,10 +68,6 @@ class _PluginObject:
     def get_netmask(self):
         assert self.is_connected()
         return self.cfg["internet"]["ip"].split("/")[1]
-
-    def get_interface(self):
-        assert self.is_connected()
-        return "eth1"
 
     def get_extra_prefix_list(self):
         assert self.is_connected()
