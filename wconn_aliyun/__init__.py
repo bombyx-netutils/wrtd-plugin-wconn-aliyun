@@ -77,6 +77,15 @@ class _PluginObject:
             ret.append((str(bnet.network_address), str(bnet.netmask)))
         return ret
 
+    def get_business_attributes(self):
+        # returns {
+        #    "bandwidth": 10,           # unit: KB/s, no key means bandwidth is unknown
+        #    "billing": "traffic",      # values: "traffic" or "time", no key means no billing
+        #    "balance": 10.0,
+        #    "balance-unit": "yuan",
+        # }
+        assert False
+
     def interface_appear(self, ifname):
         if ifname == "eth0":
             if "intranet" in self.cfg:
@@ -116,3 +125,15 @@ class _PluginObject:
             assert self.bAlive
             self.bAlive = False
             self.downCallback()
+
+    def _bussinessAttrFetch(self):
+        pass
+
+    def _bussinessAttrFetchComplete(self):
+        pass
+
+    def _bussinessAttrFetchError(self):
+        pass
+
+    def _bussinessAttrFetchDispose(self):
+        pass
