@@ -21,4 +21,8 @@
             },
         ],
     },
+    "access-key": {                              # optional
+        "id": "ATBLYwxR1VjIiUP0",
+        "secret": "ATBLYwxR1VjIiUP0",
+    },
 }

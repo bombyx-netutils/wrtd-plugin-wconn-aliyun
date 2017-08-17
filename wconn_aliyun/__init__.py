@@ -28,6 +28,7 @@ class _PluginObject:
         self.upCallback = upCallback
         self.downCallback = downCallback
         self.logger = logging.getLogger(self.__module__ + "." + self.__class__.__name__)
+        self.businessAttrDict = dict()
         self.bAlive = False
 
     def get_interface(self):
@@ -78,6 +79,8 @@ class _PluginObject:
         return ret
 
     def get_business_attributes(self):
+        assert self.is_connected()
+        return self.businessAttrDict
         # returns {
         #    "bandwidth": 10,           # unit: KB/s, no key means bandwidth is unknown
         #    "billing": "traffic",      # values: "traffic" or "time", no key means no billing
@@ -111,6 +114,14 @@ class _PluginObject:
                 if "gateway" in self.cfg["internet"]:
                     ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["internet"]["gateway"], oif=idx)
             self.logger.info("Internet interface \"%s\" managed." % (ifname))
+
+            if "access-key" in self.cfg:
+                self.businessAttrDict = dict()
+                #fixme
+
+
+
+
             self.bAlive = True
             try:
                 self.upCallback()
@@ -124,16 +135,5 @@ class _PluginObject:
         if ifname == "eth1":
             assert self.bAlive
             self.bAlive = False
+            self.businessAttrDict = dict()
             self.downCallback()
-
-    def _bussinessAttrFetch(self):
-        pass
-
-    def _bussinessAttrFetchComplete(self):
-        pass
-
-    def _bussinessAttrFetchError(self):
-        pass
-
-    def _bussinessAttrFetchDispose(self):
-        pass
