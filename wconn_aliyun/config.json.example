@@ -21,7 +21,7 @@
             },
         ],
     },
-    "access-key": {                              # optional
+    "access-key": {                              # optional, used for retriving bussiness information
         "id": "ATBLYwxR1VjIiUP0",
         "secret": "ATBLYwxR1VjIiUP0",
     },
