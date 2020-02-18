@@ -32,7 +32,7 @@ class _PluginObject:
         self.bAlive = False
 
     def get_interface(self):
-        return "eth1"
+        return "eth0"
 
     def start(self):
         if "nameservers" in self.cfg["internet"]:
@@ -43,17 +43,12 @@ class _PluginObject:
         self.logger.info("Started.")
 
     def stop(self):
-        for ifname in ["eth0", "eth1"]:
-            with pyroute2.IPRoute() as ipp:
-                idx = None
-                try:
-                    idx = ipp.link_lookup(ifname=ifname)[0]
-                except IndexError:
-                    continue
-                ipp.link("set", index=idx, state="down")
-                ipp.flush_addr(index=idx)
-                if ifname == "eth1":
-                    self.downCallback()
+        with pyroute2.IPRoute() as ipp:
+            idx = None
+            idx = ipp.link_lookup(ifname="eth0")[0]
+            ipp.link("set", index=idx, state="down")
+            ipp.flush_addr(index=idx)
+            self.downCallback()
 
         with open(self.ownResolvConf, "w") as f:
             f.write("")
@@ -94,30 +89,13 @@ class _PluginObject:
                     if "routes" in self.cfg["intranet"]:
                         for rt in self.cfg["intranet"]["routes"]:
                             ipp.route('add', dst=rt["prefix"], gateway=rt["gateway"], oif=idx)
-            self.logger.info("Intranet interface \"%s\" managed." % (ifname))
-            return True
-
-        if ifname == "eth1":
-            ip = self.cfg["internet"]["ip"].split("/")[0]
-            bnet = ipaddress.IPv4Network(self.cfg["internet"]["ip"], strict=False)
-            with pyroute2.IPRoute() as ipp:
-                idx = ipp.link_lookup(ifname="eth1")[0]
-                ipp.link("set", index=idx, state="up")
-                ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=str(bnet.broadcast_address))
-                if "gateway" in self.cfg["internet"]:
-                    ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["internet"]["gateway"], oif=idx)
-            self.logger.info("Internet interface \"%s\" managed." % (ifname))
-            self.bAlive = True
-            try:
-                self.upCallback()
-            except:
-                assert False               # fixme, what to do?
+            self.logger.info("Interface \"%s\" managed." % (ifname))
             return True
 
         return False
 
     def interface_disappear(self, ifname):
-        if ifname == "eth1":
+        if ifname == "eth0":
             assert self.bAlive
             self.bAlive = False
             self.businessAttrDict = dict()

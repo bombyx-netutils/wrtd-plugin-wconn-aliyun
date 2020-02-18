@@ -11,7 +11,7 @@ if [ -n "$OUTPUT" ] ; then
     ERRFLAG=1
 fi
 
-OUTPUT=`pep8 ${LIBFILES} | grep -Ev "E501"`
+OUTPUT=`pycodestyle ${LIBFILES} | grep -Ev "E501"`
 if [ -n "$OUTPUT" ] ; then
     echo "pep8 errors:"
     echo "$OUTPUT"
