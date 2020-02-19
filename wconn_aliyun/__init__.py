@@ -35,11 +35,11 @@ class _PluginObject:
         return "eth0"
 
     def start(self):
-        if "nameservers" in self.cfg["internet"]:
+        if "nameservers" in self.cfg["intranet"]:
             with open(self.ownResolvConf, "w") as f:
-                for ns in self.cfg["internet"]["nameservers"]:
+                for ns in self.cfg["intranet"]["nameservers"]:
                     f.write("nameserver %s\n" % (ns))
-            self.logger.info("Nameservers are \"%s\"." % ("\",\"".join(self.cfg["internet"]["nameservers"])))
+            self.logger.info("Nameservers are \"%s\"." % ("\",\"".join(self.cfg["intranet"]["nameservers"])))
         self.logger.info("Started.")
 
     def stop(self):
@@ -86,10 +86,13 @@ class _PluginObject:
                     idx = ipp.link_lookup(ifname="eth0")[0]
                     ipp.link("set", index=idx, state="up")
                     ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=str(bnet.broadcast_address))
+                    if "gateway" in self.cfg["intranet"]:
+                        ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["intranet"]["gateway"], oif=idx)
                     if "routes" in self.cfg["intranet"]:
                         for rt in self.cfg["intranet"]["routes"]:
                             ipp.route('add', dst=rt["prefix"], gateway=rt["gateway"], oif=idx)
             self.logger.info("Interface \"%s\" managed." % (ifname))
+            self.bAlive = True
             return True
 
         return False
