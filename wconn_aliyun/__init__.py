@@ -35,11 +35,11 @@ class _PluginObject:
         return "eth0"
 
     def start(self):
-        if "nameservers" in self.cfg["intranet"]:
+        if "nameservers" in self.cfg:
             with open(self.ownResolvConf, "w") as f:
-                for ns in self.cfg["intranet"]["nameservers"]:
+                for ns in self.cfg["nameservers"]:
                     f.write("nameserver %s\n" % (ns))
-            self.logger.info("Nameservers are \"%s\"." % ("\",\"".join(self.cfg["intranet"]["nameservers"])))
+            self.logger.info("Nameservers are \"%s\"." % ("\",\"".join(self.cfg["nameservers"])))
         self.logger.info("Started.")
 
     def stop(self):
@@ -59,18 +59,17 @@ class _PluginObject:
 
     def get_ip(self):
         assert self.is_connected()
-        return self.cfg["internet"]["ip"].split("/")[0]
+        return self.cfg["internet-ip"].split("/")[0]
 
     def get_netmask(self):
         assert self.is_connected()
-        return self.cfg["internet"]["ip"].split("/")[1]
+        return self.cfg["netmask"].split("/")[1]
 
     def get_extra_prefix_list(self):
         assert self.is_connected()
         ret = []
-        if "intranet" in self.cfg:
-            bnet = ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False)
-            ret.append((str(bnet.network_address), str(bnet.netmask)))
+        bnet = ipaddress.IPv4Network(self.cfg["ip"] + "/" + self.cfg["netmask"], strict=False)
+        ret.append((str(bnet.network_address), str(bnet.netmask)))
         return ret
 
     def get_business_attributes(self):
@@ -79,18 +78,17 @@ class _PluginObject:
 
     def interface_appear(self, ifname):
         if ifname == "eth0":
-            if "intranet" in self.cfg:
-                ip = self.cfg["intranet"]["ip"].split("/")[0]
-                bnet = ipaddress.IPv4Network(self.cfg["intranet"]["ip"], strict=False)
-                with pyroute2.IPRoute() as ipp:
-                    idx = ipp.link_lookup(ifname="eth0")[0]
-                    ipp.link("set", index=idx, state="up")
-                    ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=str(bnet.broadcast_address))
-                    if "gateway" in self.cfg["intranet"]:
-                        ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["intranet"]["gateway"], oif=idx)
-                    if "routes" in self.cfg["intranet"]:
-                        for rt in self.cfg["intranet"]["routes"]:
-                            ipp.route('add', dst=rt["prefix"], gateway=rt["gateway"], oif=idx)
+            ip = self.cfg["ip"].split("/")[0]
+            bnet = ipaddress.IPv4Network(self.cfg["ip"] + "/" + self.cfg["netmask"], strict=False)
+            with pyroute2.IPRoute() as ipp:
+                idx = ipp.link_lookup(ifname="eth0")[0]
+                ipp.link("set", index=idx, state="up")
+                ipp.addr("add", index=idx, address=ip, mask=bnet.prefixlen, broadcast=str(bnet.broadcast_address))
+                if "gateway" in self.cfg:
+                    ipp.route('add', dst="0.0.0.0/0", gateway=self.cfg["gateway"], oif=idx)
+                if "routes" in self.cfg:
+                    for rt in self.cfg["routes"]:
+                        ipp.route('add', dst=rt["prefix"], gateway=rt["gateway"], oif=idx)
             self.logger.info("Interface \"%s\" managed." % (ifname))
             self.bAlive = True
             return True

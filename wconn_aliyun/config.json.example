@@ -1,26 +1,23 @@
 {
     "plugin": "aliyun",
-    "internet": {
-        "ip": "121.33.97.55/22",
-        "gateway", "121.33.99.247",
-        "nameservers": [
-            "10.202.72.118",
-            "10.202.72.119",
-        ],
-    },
-    "intranet": {
-        "ip": "10.254.1.155/21",
-        "routes": [
-            {
-                "prefix": "10.0.0.0/8",
-                "gateway": "10.254.7.247",
-            },
-            {
-                "prefix": "172.16.0.0/12",
-                "gateway": "10.254.7.247",
-            },
-        ],
-    },
+    "internet-ip": "121.33.97.55",
+    "ip": "10.254.1.155",
+    "netmask": "255.255.240.0",
+    "gateway": "121.33.99.247",
+    "nameservers": [
+        "10.202.72.118",
+        "10.202.72.119",
+    ],
+    "routes": [
+        {
+            "prefix": "10.0.0.0/8",
+            "gateway": "10.254.7.247",
+        },
+        {
+            "prefix": "172.16.0.0/12",
+            "gateway": "10.254.7.247",
+        },
+    ],
     "access-key": {                              # optional, used for retriving bussiness information
         "id": "ATBLYwxR1VjIiUP0",
         "secret": "ATBLYwxR1VjIiUP0",
