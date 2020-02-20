@@ -6,19 +6,6 @@ import pyroute2
 import ipaddress
 
 
-def get_plugin_list():
-    return [
-        "aliyun",
-    ]
-
-
-def get_plugin(name):
-    if name == "aliyun":
-        return _PluginObject()
-    else:
-        assert False
-
-
 class _PluginObject:
 
     def init2(self, cfg, tmpDir, ownResolvConf, upCallback, downCallback):
